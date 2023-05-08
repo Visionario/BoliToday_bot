@@ -22,9 +22,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwa
     user_data = kwargs['user_data']
 
     if user_data.created:
-        msg = responses_es.get('menu_start_new_user')
+        msg = responses_es.get('menu_start_new_user').replace('{{first_name}}', update.effective_chat.first_name)
     else:
-        msg = responses_es.get('menu_start_returning_user')
+        msg = responses_es.get('menu_start_returning_user').replace('{{first_name}}', update.effective_chat.first_name)
 
     await context.bot.send_message(
             chat_id=update.effective_chat.id,
