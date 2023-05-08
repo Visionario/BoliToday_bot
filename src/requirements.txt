@@ -1,0 +1,10 @@
+python-telegram-bot
+requests
+Pillow
+python-dotenv
+apscheduler
+pytz
+sqlalchemy
+pydantic
+beautifulsoup4
+bs4
