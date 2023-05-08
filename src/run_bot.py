@@ -16,13 +16,18 @@ logger = setup_logger(settings.DEFAULT_NAME)
 
 async def post_ini(application: Application, *args, **kwargs):
     from models import Config
-    logger.debug("post_ini")
+    logger.info("post_ini")
+
     bot: ExtBot
     bot = application.bot
+
+    # IGNORE THIS--> if settings.NOTIFY_STARTUP:
+    logger.info("Sending telegram notify to log channel for Startup")
     await bot.send_message(
             chat_id=settings.LOG_CHANNEL,
-            text=f"Initializing @{application.bot.username}"
+            text=f"Initializing @{application.bot.username}, Ver:{settings.APP_INFO['version']}"
             )
+
     response_photo = await bot.send_photo(
             chat_id=settings.LOG_CHANNEL,
             photo=photo_file
@@ -33,11 +38,14 @@ async def post_ini(application: Application, *args, **kwargs):
 
 
 async def post_stop(application: Application, *args, **kwargs):
-    logger.debug("post_stop")
-    await application.bot.send_message(
-            chat_id=settings.LOG_CHANNEL,
-            text=f"Shutting down @{application.bot.username}"
-            )
+    logger.info("post_stop")
+
+    if settings.NOTIFY_SHUTDOWN:
+        logger.info("Sending telegram notify to log channel for Shutdown")
+        await application.bot.send_message(
+                chat_id=settings.LOG_CHANNEL,
+                text=f"Shutting down @{application.bot.username}"
+                )
 
 
 def initialize():
@@ -45,9 +53,11 @@ def initialize():
 
 
 def main():
+    logger.info("Initializing ...")
     initialize()
 
     # https://docs.python-telegram-bot.org/en/stable/telegram.ext.applicationbuilder.html
+    logger.info("Building Telegram Bot ...")
     application: Application = (ApplicationBuilder()
                                 .post_init(post_init=post_ini)
                                 .defaults(Defaults(parse_mode='HTML'))
@@ -56,19 +66,25 @@ def main():
                                 .build()
                                 )
 
+    logger.info("Adding Telegram Bot handlers ...")
     # Add bot_handlers
     for h in basic_handlers:
+        logger.info(f"Handler for {h.commands}")
         application.add_handler(h)
 
     for h in admin_handlers:
+        logger.info(f"Handler for {h.commands}")
         application.add_handler(h)
 
     del h
 
+    logger.info("Entering in polling mode...")
     application.run_polling(drop_pending_updates=True)
 
 
+logger.info("Preparing jobs and schedulers for automatic tasks...")
 add_job_tick_get_from_bolis_info()
+# add_job_tick_get_from_cmc()
 start_bot_schedulers()
 
 main()

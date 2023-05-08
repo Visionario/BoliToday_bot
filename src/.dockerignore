@@ -16,6 +16,8 @@ venv.bak/
 
 
 .idea/**/*
+../.idea/**/*
+../../.idea/**/*
 *.log
 *.sqlite
 
@@ -29,5 +31,3 @@ venv.bak/
 /*.log
 /logs/**
 /logs/
-*.session
-*.session-journal

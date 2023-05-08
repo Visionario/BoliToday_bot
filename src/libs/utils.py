@@ -4,6 +4,7 @@ from telegram import Update
 
 from libs.external_data.api_cmc import get_cmc_data
 from libs.external_data.web_scrap import BolisInfo
+from libs.logger import setup_logger
 from libs.settings import AppSettings
 from models import Config, Session, User
 from models.pydantic import UserData
@@ -15,36 +16,47 @@ from libs.write_on_image import SkeletonImage
 # Settings
 settings = AppSettings()
 
+# LOGGER
+logger = setup_logger(settings.DEFAULT_NAME)
+
 
 def update_last_photo_file_id(file_id: str):
     """Set last file id to Config, for future sends"""
 
 
 def do_full_update():
+    """Full update from services"""
     config: Config | None = None
 
     # Check for database
+    logger.info("Doing a full update from services...")
+
     try:
         config: Config = Config.get_config()
     except BaseException as e:
+        logger.critical(f"FATAL ERROR DATABASE (WILL EXIT): {e.args}")
         # TODO: report to admin/lOG before quit
         print("FATAL ERROR DATABASE:", e.args, "\nExiting...")
         exit()
 
     if config is None:
+        logger.critical(f"FATAL ERROR DATABASE Exiting..")
         # TODO: report to admin/lOG before quit
         print("FATAL ERROR DATABASE\nExiting...")
         exit()
 
     # Update from bolis.info
     if (datetime.now() - config.last_bolis_info_update) >= timedelta(seconds=settings.BOLIS_INFO_UPDATE_INTERVAL):
+        logger.debug("Fetching data from bolis.info (scrapping method)")
         bolis_info_data: BolisInfo = update_from_bolis_info()
 
     # Update from CMC
     if (datetime.now() - config.last_cmc_update) >= timedelta(seconds=settings.CMC_UPDATE_INTERVAL):
+        logger.debug("Fetching data from CMC (API method)")
         cmc_info_data = update_from_cmc()
 
     #
+    logger.debug("Rendering a new image...")
     create_new_image(line99=f"Actualizado: {datetime.utcnow().replace(microsecond=0).isoformat()}")
 
     return True

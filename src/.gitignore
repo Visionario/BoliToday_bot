@@ -16,6 +16,8 @@ venv.bak/
 
 
 .idea/**/*
+../.idea/**/*
+../../.idea/**/*
 *.log
 *.sqlite
 
