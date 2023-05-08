@@ -57,7 +57,7 @@ def do_full_update():
 
     #
     logger.debug("Rendering a new image...")
-    create_new_image(line99=f"Actualizado: {datetime.utcnow().replace(microsecond=0).isoformat()}")
+    create_new_image(line99=f"Actualizado: {datetime.utcnow().replace(microsecond=0).isoformat()} UTC")
 
     return True
 
