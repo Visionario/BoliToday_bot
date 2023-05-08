@@ -7,7 +7,7 @@ from schedulers.jobs import tick_get_from_bolis_info, tick_get_from_cmd
 settings = AppSettings()
 
 # LOGGER
-logger = setup_logger(__name__)
+logger = setup_logger("SCHEDULERS")
 
 
 def add_job_tick_get_from_bolis_info():

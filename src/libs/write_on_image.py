@@ -43,6 +43,6 @@ class SkeletonImage:
         self.draw.text(xy=(180, 700), text=line4, font=self.font_bold, fill=self.colors['white'])
         self.draw.text(xy=(180, 800), text=line5, font=self.font_bold, fill=self.colors['white'])
 
-        self.draw.text(xy=(380, 950), text=line99, font=ImageFont.truetype(settings.FONT_REGULAR, size=30), fill=self.colors['white'])
+        self.draw.text(xy=(365, 950), text=line99, font=ImageFont.truetype(settings.FONT_REGULAR, size=30), fill=self.colors['white'])
 
         self.base_image.save(photo_file)  # Default tmp/ directory
