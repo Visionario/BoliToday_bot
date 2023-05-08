@@ -5,7 +5,7 @@ from libs.constants import photo_file
 from libs.logger import setup_logger
 from libs.settings import AppSettings
 from libs.utils import do_full_update
-from schedulers.schedulers import add_job_tick_get_from_bolis_info, start_bot_schedulers
+from schedulers.schedulers import add_job_tick_get_from_bolis_info, add_job_tick_get_from_cmc, start_bot_schedulers
 
 # Settings
 settings = AppSettings()
@@ -84,7 +84,7 @@ def main():
 
 logger.info("Preparing jobs and schedulers for automatic tasks...")
 add_job_tick_get_from_bolis_info()
-# add_job_tick_get_from_cmc()
+add_job_tick_get_from_cmc()
 start_bot_schedulers()
 
 main()
