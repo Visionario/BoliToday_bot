@@ -1,4 +1,4 @@
-from db.models import *
+from models import *
 
 with Session() as session:
     user = User(user_id=123)

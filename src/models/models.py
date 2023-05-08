@@ -12,6 +12,11 @@ from libs.settings import AppSettings
 
 __all__ = ['engine', 'Session', 'Config', 'User', ]
 
+
+class Base(DeclarativeBase):
+    pass
+
+
 # Settings
 settings = AppSettings()
 
@@ -22,10 +27,6 @@ engine = create_engine(
         )
 
 Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-class Base(DeclarativeBase):
-    pass
 
 
 class Config(Base):
@@ -108,3 +109,13 @@ class User(Base):
     is_active: Mapped[Optional[bool]] = mapped_column(default=True, nullable=False)
     last_error_tg_update: Mapped[Optional[str]] = mapped_column(String(4096))
     last_cmd: Mapped[Optional[str]] = mapped_column(String(64), default=None)
+
+
+if not settings.DATABASE_PATH.exists():
+    Base.metadata.create_all(engine)
+    with Session() as session:
+        config = Config(
+                bot_is_muted=False
+                )
+        session.add(config)
+        session.commit()

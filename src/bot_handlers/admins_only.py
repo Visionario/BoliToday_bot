@@ -1,11 +1,10 @@
 from telegram import Update
 from telegram.ext import CommandHandler, ContextTypes, filters
 
-from db import Session
-from db.models import Config
 from libs.decorators import only_admins
 from libs.logger import setup_logger
 from libs.settings import AppSettings
+from models import Config, Session
 
 # Settings
 settings = AppSettings()

@@ -37,7 +37,7 @@ async def price(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwa
     logger.debug("handler_price")
     user_data = kwargs['user_data']
 
-    from db import Config
+    from models import Config
     await context.bot.copy_message(
             chat_id=update.effective_chat.id,
             message_id=Config.get_last_msg_id(),

@@ -3,9 +3,9 @@ from telegram.ext import Application, ApplicationBuilder, Defaults, ExtBot
 from bot_handlers import admin_handlers, basic_handlers
 from libs.constants import photo_file
 from libs.logger import setup_logger
+from libs.settings import AppSettings
 from libs.utils import do_full_update
 from schedulers.schedulers import add_job_tick_get_from_bolis_info, start_bot_schedulers
-from src.libs.settings import AppSettings
 
 # Settings
 settings = AppSettings()
@@ -15,7 +15,7 @@ logger = setup_logger(settings.DEFAULT_NAME)
 
 
 async def post_ini(application: Application, *args, **kwargs):
-    from db import Config
+    from models import Config
     logger.debug("post_ini")
     bot: ExtBot
     bot = application.bot
@@ -28,14 +28,8 @@ async def post_ini(application: Application, *args, **kwargs):
             photo=photo_file
             )
 
+    # Set las msg id for future message copies
     Config.set_last_photo_msg_id(response_photo.id)
-    pass
-
-    # copy_message = await bot.copy_message(
-    #         chat_id=settings.ADMINS[0],
-    #         message_id=response_photo.id,
-    #         from_chat_id=settings.LOG_CHANNEL,
-    #         )
 
 
 async def post_stop(application: Application, *args, **kwargs):

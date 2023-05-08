@@ -2,12 +2,11 @@ from datetime import datetime, timedelta
 
 from telegram import Update
 
-from db import Session, User
-from db.models import Config
 from libs.external_data.api_cmc import get_cmc_data
 from libs.external_data.web_scrap import BolisInfo
-from libs.pydantic_models import UserData
 from libs.settings import AppSettings
+from models import Config, Session, User
+from models.pydantic import UserData
 
 __all__ = ['get_or_update_user', 'do_full_update', 'create_new_image', 'update_from_cmc', 'update_from_bolis_info']
 
