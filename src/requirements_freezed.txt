@@ -9,6 +9,7 @@ h11==0.14.0
 httpcore==0.16.3
 httpx==0.24.0
 idna==3.4
+lxml==4.9.2
 Pillow==9.5.0
 pydantic==1.10.7
 python-dotenv==1.0.0

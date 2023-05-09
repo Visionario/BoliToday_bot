@@ -108,7 +108,7 @@ class AppSettings(object):
         self.APP_INFO = {
                 'name': f'{default_name})',
                 'license': "GPL-3",
-                'version': "0.1.2",
+                'version': "0.1.3",
                 'status': "DEVELOPMENT",
                 'author': "Asdrúbal Velásquez Lagrave",
                 'contact': "Telegram/Twitter/Github: @Visionario",
