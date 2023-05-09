@@ -48,6 +48,19 @@ async def post_stop(application: Application, *args, **kwargs):
                 )
 
 
+def add_handlers(application: Application):
+    """Add bot handlers"""
+    logger.info("Adding Telegram Bot handlers ...")
+
+    for handler in basic_handlers:
+        logger.info(f"Handler for {handler.commands}")
+        application.add_handler(handler)
+
+    for handler in admin_handlers:
+        logger.info(f"Handler for {handler.commands}")
+        application.add_handler(handler)
+
+
 def initialize():
     do_full_update()
 
@@ -66,17 +79,7 @@ def main():
                                 .build()
                                 )
 
-    logger.info("Adding Telegram Bot handlers ...")
-    # Add bot_handlers
-    for h in basic_handlers:
-        logger.info(f"Handler for {h.commands}")
-        application.add_handler(h)
-
-    for h in admin_handlers:
-        logger.info(f"Handler for {h.commands}")
-        application.add_handler(h)
-
-    del h
+    add_handlers(application)
 
     logger.info("Entering in polling mode...")
     application.run_polling(drop_pending_updates=True)
