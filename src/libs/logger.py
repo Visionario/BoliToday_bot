@@ -35,11 +35,16 @@ LOGGING_CONFIG = {
                 #         "handlers": ["stream_handler"],
                 #         },
                 "PIL": {
-                        "level": "INFO",
+                        "level": "WARNING",
                         "propagate": False,
                         "handlers": ["stream_handler"],
                         },
                 "HANDLERS_BASICS": {
+                        "level": "DEBUG",
+                        "propagate": False,
+                        "handlers": ["stream_handler", "file_handler"],
+                        },
+                "HANDLERS_ADMINS": {
                         "level": "DEBUG",
                         "propagate": False,
                         "handlers": ["stream_handler", "file_handler"],

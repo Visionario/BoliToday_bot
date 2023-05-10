@@ -11,7 +11,6 @@ settings = AppSettings()
 
 # LOGGER
 logger = setup_logger("HANDLERS_ADMINS")
-# logger = setup_logger(__name__)
 
 __all__ = ['admin_handlers']
 
