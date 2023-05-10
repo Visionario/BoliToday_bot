@@ -1,7 +1,7 @@
 from telegram.ext import Application, ApplicationBuilder, Defaults, ExtBot
 
 from bot_handlers import admin_handlers, basic_handlers
-from libs.constants import photo_file
+from libs.constants import PHOTO_FILE
 from libs.logger import setup_logger
 from libs.settings import AppSettings
 from libs.utils import do_full_update
@@ -30,7 +30,7 @@ async def post_ini(application: Application, *args, **kwargs):
 
     response_photo = await bot.send_photo(
             chat_id=settings.LOG_CHANNEL,
-            photo=photo_file
+            photo=PHOTO_FILE
             )
 
     # Set las msg id for future message copies

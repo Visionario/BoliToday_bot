@@ -1,2 +1,3 @@
-photo_file = '/tmp/bolitoday_last.png'
-database_file = 'database.sqlite3'
+APP_VERSION = "0.1.3"
+PHOTO_FILE = '/tmp/bolitoday_last.png'
+DATABASE_FILE = 'database.sqlite3'

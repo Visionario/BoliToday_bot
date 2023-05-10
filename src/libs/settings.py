@@ -3,11 +3,9 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from libs.constants import database_file
+from libs.constants import APP_VERSION, DATABASE_FILE
 
 __all__ = ['AppSettings']
-
-default_name = "BoliToday_bot"
 
 
 class AppSettings(object):
@@ -44,13 +42,15 @@ class AppSettings(object):
             )
 
     def __init__(self, initializing=False, *args, **kwargs):
+        DEFAULT_NAME = "BoliToday_bot"
+
         # Read all variable environments
         load_dotenv()
 
         # BASE_DIR is exactly when source is, avoid bad references when importing
         self.BASE_DIR = Path(__file__).resolve().parent.parent
 
-        self.DEFAULT_NAME = default_name
+        self.DEFAULT_NAME = DEFAULT_NAME
 
         # Telegram credentials
         self.BOT_TOKEN = str(os.getenv('BOLITODAY_BOT_TOKEN', ''))
@@ -82,17 +82,17 @@ class AppSettings(object):
         self.BOLIS_INFO_UPDATE_INTERVAL = int(os.getenv('BOLITODAY_BOLIS_INFO_UPDATE_INTERVAL', 300))
 
         # Force lowercase and NO spaces
-        self.DEFAULT_UTILITY_NAME = default_name.strip().replace(" ", "_").lower()
+        self.DEFAULT_UTILITY_NAME = DEFAULT_NAME.strip().replace(" ", "_").lower()
 
         self.DEV_DEBUG = bool(os.getenv('BOLITODAY_DEV_DEBUG', False))
 
         # Log settings
-        self.LOG_FILE = f"{self.BASE_DIR}/{default_name.lower()}.log"
+        self.LOG_FILE = f"{self.BASE_DIR}/{DEFAULT_NAME.lower()}.log"
         self.LOG_LEVEL = str(os.getenv('BOLITODAY_LOG_LEVEL', 'INFO'))
 
         # Database (SQLite by default)
-        self.DATABASE_URI = str(os.getenv('BOLITODAY_DATABASE_URI', f'sqlite:///database/{database_file}'))
-        self.DATABASE_PATH = Path(self.BASE_DIR / 'database' / database_file)
+        self.DATABASE_URI = str(os.getenv('BOLITODAY_DATABASE_URI', f'sqlite:///database/{DATABASE_FILE}'))
+        self.DATABASE_PATH = Path(self.BASE_DIR / 'database' / DATABASE_FILE)
 
         # Notifications
         self.NOTIFY_STARTUP = bool(os.getenv('BOLITODAY_NOTIFY_STARTUP', False))
@@ -106,9 +106,9 @@ class AppSettings(object):
 
         # App data info
         self.APP_INFO = {
-                'name': f'{default_name})',
+                'name': DEFAULT_NAME,
                 'license': "GPL-3",
-                'version': "0.1.3",
+                'version': APP_VERSION,
                 'status': "DEVELOPMENT",
                 'author': "Asdrúbal Velásquez Lagrave",
                 'contact': "Telegram/Twitter/Github: @Visionario",

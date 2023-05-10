@@ -2,7 +2,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-from libs.constants import photo_file
+from libs.constants import PHOTO_FILE
 from libs.settings import AppSettings
 
 __all__ = ['SkeletonImage']
@@ -45,4 +45,4 @@ class SkeletonImage:
 
         self.draw.text(xy=(365, 950), text=line99, font=ImageFont.truetype(settings.FONT_REGULAR, size=30), fill=self.colors['white'])
 
-        self.base_image.save(photo_file)  # Default tmp/ directory
+        self.base_image.save(PHOTO_FILE)  # Default tmp/ directory
