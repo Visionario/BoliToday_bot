@@ -31,5 +31,4 @@ class BolisInfo:
         return response.content
 
     def _get_value_bolis_info(self, soup: BeautifulSoup) -> list:
-        values = soup.find_all('div', 'card-body')
-        return [list(value.text.split(' ')) for value in values]
+        return [list(value.text.split(' ')) for value in soup.find_all('div', 'card-body')]
