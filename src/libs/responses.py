@@ -1,3 +1,6 @@
+"""
+Responses by languages
+"""
 responses_es = {
         "menu_start_new_user": (
                 "Hola, {{first_name}},\n"

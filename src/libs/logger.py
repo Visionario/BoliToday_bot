@@ -1,4 +1,8 @@
+"""
+Custom Logger
+"""
 import logging
+import logging.handlers
 from logging import config
 
 from .settings import AppSettings
@@ -18,22 +22,19 @@ class LevelOnlyFilter:
 
 LOGGING_CONFIG = {
         "version": 1,
+        'disable_existing_loggers': True,
         "loggers": {
                 "": {
                         "level": "DEBUG",
                         "propagate": False,
-                        "handlers": ["stream_handler", "file_handler"],
+                        "handlers": ["stream_handler", "rotating_file_handler"],
                         },
-                # "root": {
-                #         "level": "DEBUG",
-                #         "propagate": False,
-                #         "handlers": ["stream_handler", "file_handler"],
-                #         },
-                # "asyncio": {
-                #         "level": "WARNING",
-                #         "propagate": False,
-                #         "handlers": ["stream_handler"],
-                #         },
+                settings.DEFAULT_NAME: {
+                        "level": "DEBUG",
+                        "propagate": False,
+                        "handlers": ["stream_handler", "rotating_file_handler"],
+                        },
+
                 "PIL": {
                         "level": "WARNING",
                         "propagate": False,
@@ -42,29 +43,34 @@ LOGGING_CONFIG = {
                 "HANDLERS_BASICS": {
                         "level": "DEBUG",
                         "propagate": False,
-                        "handlers": ["stream_handler", "file_handler"],
+                        "handlers": ["stream_handler", "rotating_file_handler"],
                         },
                 "HANDLERS_ADMINS": {
                         "level": "DEBUG",
                         "propagate": False,
-                        "handlers": ["stream_handler", "file_handler"],
+                        "handlers": ["stream_handler", "rotating_file_handler"],
+                        },
+                "BOT_UTILS": {
+                        "level": "DEBUG",
+                        "propagate": False,
+                        "handlers": ["stream_handler", "rotating_file_handler"],
+                        },
+                "LIB_UTILS": {
+                        "level": "DEBUG",
+                        "propagate": False,
+                        "handlers": ["stream_handler", "rotating_file_handler"],
                         },
                 "telegram": {
                         "level": "WARNING",
                         "propagate": False,
-                        "handlers": ["stream_handler", "file_handler"],
+                        "handlers": ["stream_handler", "rotating_file_handler"],
                         },
                 "apscheduler": {
-                        "level": "INFO",
+                        "level": "WARNING",
                         "propagate": False,
                         "handlers": ["stream_handler"],
                         },
 
-                settings.DEFAULT_NAME: {
-                        "level": "DEBUG",
-                        "propagate": False,
-                        "handlers": ["stream_handler", "file_handler"],
-                        },
                 },
         "handlers": {
                 "stream_handler": {
@@ -81,6 +87,15 @@ LOGGING_CONFIG = {
                         "level": "DEBUG",
                         "formatter": "file_formatter",
                         },
+                "rotating_file_handler": {
+                        "class": "logging.handlers.RotatingFileHandler",
+                        'maxBytes': 2097152,  # 2Mb
+                        'backupCount': 3,
+                        "filename": settings.LOG_FILE,
+                        "mode": "a",
+                        "level": "DEBUG",
+                        "formatter": "file_formatter",
+                        },
                 },
         "filters": {
                 "only_warning": {
@@ -90,10 +105,12 @@ LOGGING_CONFIG = {
                 },
         "formatters": {
                 "default_formatter": {
-                        "format": "%(levelname)s: %(name)s - %(message)s",
+                        "format": "%(levelname)s - %(name)s - %(funcName)s - %(message)s",
+                        "datefmt": "%Y-%m-%d %H:%M:%S",
                         },
                 "file_formatter": {
-                        "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+                        "format": "%(asctime)s - %(levelname)s - %(name)s - %(funcName)s - %(message)s",
+                        "datefmt": "%Y-%m-%d %H:%M:%S",
                         },
                 },
         }

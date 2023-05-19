@@ -20,8 +20,6 @@ async def mode_mute(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, *
     """Mute/Unmute Bot: Ignore all users except ADMINS"""
     logger.debug("mode_mute")
 
-    # new_value = db_update(Config).where(Config.c.id == 1).values(bot_is_muted=True)
-
     mute_switch = update.message.text.lower().split(' ')[-1:][0]
     if mute_switch == 'on':
         mute_switch = True

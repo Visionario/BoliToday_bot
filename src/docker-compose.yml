@@ -5,7 +5,7 @@ services:
   app:
     container_name: bolitoday
     volumes:
-      - ./database/:/app/database/
+      - ./docker_database/:/app/database/
 
     build:
       context: .

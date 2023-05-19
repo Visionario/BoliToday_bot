@@ -1,8 +1,8 @@
-python-telegram-bot
+python-telegram-bot[job-queue]
 requests
 Pillow
 python-dotenv
-apscheduler
+#apscheduler
 pytz
 sqlalchemy
 pydantic

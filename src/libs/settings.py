@@ -1,3 +1,6 @@
+"""
+System Settings
+"""
 import os
 from pathlib import Path
 
@@ -87,7 +90,9 @@ class AppSettings(object):
         self.DEV_DEBUG = bool(os.getenv('BOLITODAY_DEV_DEBUG', False))
 
         # Log settings
-        self.LOG_FILE = f"{self.BASE_DIR}/{DEFAULT_NAME.lower()}.log"
+        # test/create Logs dir
+        Path(self.BASE_DIR / 'logs').mkdir(exist_ok=True)
+        self.LOG_FILE = Path(self.BASE_DIR / 'logs' / f"{DEFAULT_NAME.lower()}.log")
         self.LOG_LEVEL = str(os.getenv('BOLITODAY_LOG_LEVEL', 'INFO'))
 
         # Database (SQLite by default)

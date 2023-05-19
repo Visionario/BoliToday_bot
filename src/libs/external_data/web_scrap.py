@@ -1,12 +1,14 @@
 import requests
 from bs4 import BeautifulSoup
 
+
 class BolisInfo:
     """
     Get information from https://bolis.info
 
     Some code by Francisco "Cisco" Griman, https://github.com/fcoagz
     """
+
     def __init__(self):
         _response = 'https://bolis.info/'
         content = self._response_in_return_content(requests.get(_response))
@@ -24,7 +26,7 @@ class BolisInfo:
         # optional replace , by .
         self.coins_issued = f'{self._get_value_bolis_info(soup)[3][2]}'.replace(',', '.')
         self.coins_to_issue = f'{self._get_value_bolis_info(soup)[3][5]}'.replace(',', '.')
-    
+
     def _response_in_return_content(self, response: requests.Response) -> bytes:
         if not response.status_code == requests.codes.ok:
             raise ValueError('Cannot connect to bolis.info server')

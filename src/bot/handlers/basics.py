@@ -1,10 +1,13 @@
 from telegram import Update
+from telegram.constants import ChatAction
 from telegram.ext import CommandHandler, ContextTypes, filters
 
 from libs.decorators import update_to_user
 from libs.logger import setup_logger
 from libs.responses import responses_es
 from libs.settings import AppSettings
+from libs.utils import do_full_update_from_services_if_required, send_new_photo_to_log
+from models import Config
 
 # Settings
 settings = AppSettings()
@@ -33,15 +36,24 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwa
 
 
 @update_to_user
-async def price(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
-    logger.debug("handler_price")
+async def get_price(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
     user_data = kwargs['user_data']
+    logger.debug(
+            f"Sending data for user_id:{update.effective_user.id} username: @{update.effective_user.username} first_name:{update.effective_user.first_name}"
+            )
 
-    from models import Config
-    await context.bot.copy_message(
+    await context.bot.send_chat_action(
             chat_id=update.effective_chat.id,
-            message_id=Config.get_last_msg_id(),
-            from_chat_id=settings.LOG_CHANNEL,
+            action=ChatAction.TYPING
+            )
+
+    updated = await do_full_update_from_services_if_required(update=update)
+    if updated:
+        await send_new_photo_to_log(update=update)
+
+    await context.bot.send_photo(
+            chat_id=update.effective_chat.id,
+            photo=Config.get_last_msg_data()[1]
             )
 
 
@@ -57,7 +69,7 @@ basic_handlers.append(
 basic_handlers.append(
         CommandHandler(
                 ['price', 'precio'],
-                callback=price,
+                callback=get_price,
                 filters=filters.ChatType.PRIVATE
                 )
         )

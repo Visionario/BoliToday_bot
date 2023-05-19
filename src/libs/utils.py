@@ -1,35 +1,41 @@
+"""
+Common utils used by system
+"""
+
 from datetime import datetime, timedelta
 
-from telegram import Update
+from telegram import InputMediaPhoto, Update
+from telegram.ext import Application
 
+from libs.constants import PHOTO_FILE
 from libs.external_data.api_cmc import get_cmc_data
 from libs.external_data.web_scrap import BolisInfo
 from libs.logger import setup_logger
 from libs.settings import AppSettings
-from models import Config, Session, User
-from models.pydantic import UserData
-
-__all__ = ['get_or_update_user', 'do_full_update', 'create_new_image', 'update_from_cmc', 'update_from_bolis_info']
-
 from libs.write_on_image import SkeletonImage
+from models import Config, Session
+
+__all__ = [
+        'do_full_update_from_services',
+        'create_new_image',
+        'update_from_cmc',
+        'update_from_bolis_info',
+        'check_database',
+        'do_full_update_from_services_if_required',
+        'do_full_update_from_services',
+        'send_new_photo_to_log'
+        ]
 
 # Settings
 settings = AppSettings()
 
 # LOGGER
-logger = setup_logger(settings.DEFAULT_NAME)
+logger = setup_logger("LIB_UTILS")
 
 
-def update_last_photo_file_id(file_id: str):
-    """Set last file id to Config, for future sends"""
-
-
-def do_full_update():
-    """Full update from services"""
+def check_database():
+    """Check database asking for Config, If error HALT"""
     config: Config | None = None
-
-    # Check for database
-    logger.info("Doing a full update from services...")
 
     try:
         config: Config = Config.get_config()
@@ -45,24 +51,56 @@ def do_full_update():
         print("FATAL ERROR DATABASE\nExiting...")
         exit()
 
-    # Update from bolis.info
-    if (datetime.now() - config.last_bolis_info_update) >= timedelta(seconds=settings.BOLIS_INFO_UPDATE_INTERVAL):
-        logger.debug("Fetching data from bolis.info (scrapping method)")
-        bolis_info_data: BolisInfo = update_from_bolis_info()
+    return config
 
-    # Update from CMC
-    if (datetime.now() - config.last_cmc_update) >= timedelta(seconds=settings.CMC_UPDATE_INTERVAL):
-        logger.debug("Fetching data from CMC (API method)")
-        cmc_info_data = update_from_cmc()
 
-    #
-    logger.debug("Rendering a new image...")
+def update_if_required_bolis_info(config) -> bool:
+    """Update from bolis.info (only if required)"""
+    utc_now = datetime.utcnow()
+    if (utc_now - config.last_bolis_info_update) >= timedelta(seconds=settings.BOLIS_INFO_UPDATE_INTERVAL):
+        logger.debug("Updating data from bolis.info (scrapping method)")
+        _ = update_from_bolis_info()
+        return True
+
+    return False
+
+
+def update_if_required_cmc(config) -> bool:
+    """Update from CMC (only if required)"""
+    utc_now = datetime.utcnow()
+    if (utc_now - config.last_cmc_update) >= timedelta(seconds=settings.CMC_UPDATE_INTERVAL):
+        logger.debug("Updating data from CMC (API method)")
+        _ = update_from_cmc()
+        return True
+
+    return False
+
+
+async def do_full_update_from_services_if_required(update: Update):
+    """Full update from services. Only if required"""
+    config = check_database()
+    logger.debug("Checking for full update from services if required by timedelta ...")
+    if any([update_if_required_bolis_info(config), update_if_required_cmc(config)]):
+        create_new_image(line99=f"Actualizado: {datetime.utcnow().replace(microsecond=0).isoformat()} UTC")
+        return True
+
+    logger.debug("Not update was required")
+    return False
+
+
+def do_full_update_from_services():
+    """Full update from services"""
+
+    logger.info("Doing a full update from services (Forced)...")
+
+    config = check_database()
+    update_from_bolis_info()
+    update_from_cmc()
     create_new_image(line99=f"Actualizado: {datetime.utcnow().replace(microsecond=0).isoformat()} UTC")
-
-    return True
 
 
 def create_new_image(line99: str = ''):
+    logger.debug("Rendering a new image...")
     config: Config = Config.get_config()
 
     image = SkeletonImage()
@@ -206,77 +244,83 @@ def update_from_cmc(save_to_db: bool = True):
     else:
         btc = cmc_data_btc['data']['1053']['quote']['BTC']['price']
 
+    utc_now = datetime.utcnow()
+
     if save_to_db and not error:
         with Session() as session:
             config: Config = session.get(Config, 1)
             config.last_usd_price = usd
             config.last_btc_price = btc
-            config.last_cmc_update = datetime.utcnow()
+            config.last_cmc_update = utc_now
             session.flush()
+            logger.debug(f"Updated from CoinMarketCap")
             session.commit()
 
     return {'USD': usd, 'BTC': btc}
 
 
 def update_from_bolis_info(save_to_db: bool = True):
-    """Get updated information from https://bolis.info and save to Database
+    """Get updated information from https://bolis.info ; save to Database
     and return the data
     """
     bolis_info_data = BolisInfo()
 
+    utc_now = datetime.utcnow()
+
     if save_to_db:
-        with Session() as session:
-            config: Config = session.get(Config, 1)
-            config.last_active_masternodes = bolis_info_data.active_masternodes
-            config.last_expired_masternodes = bolis_info_data.expired_masternodes
-            config.last_hash_rate = bolis_info_data.hash_rate
-            config.last_diff = bolis_info_data.difficulty
-            config.last_bolis_info_data_update = datetime.utcnow()
-            session.flush()
-            session.commit()
+        try:
+            with Session() as session:
+                config: Config = session.get(Config, 1)
+                config.last_active_masternodes = bolis_info_data.active_masternodes
+                config.last_expired_masternodes = bolis_info_data.expired_masternodes
+                config.last_hash_rate = bolis_info_data.hash_rate
+                config.last_diff = bolis_info_data.difficulty
+                config.last_bolis_info_update = utc_now
+                session.flush()
+                logger.debug(f"Updated from bolis.info")
+                session.commit()
+        except BaseException as e:
+            pass
 
     return bolis_info_data
 
 
-def get_or_update_user(update: Update):
-    """
-    Get or Create a user. Using data from update.
-    if error return None
+async def send_new_photo_to_log(
+        application: Application | None = None,
+        update: Update | None = None,
+        initializing: bool = False
+        ):
+    from models import Config
 
-    """
-    created = False
+    if application:
+        # bot: ExtBot
+        bot = application.bot
+    elif update:
+        # bot: Update
+        bot = update.get_bot()
+    else:
+        return
 
-    with Session() as session:
-        user: User = session.get(User, update.effective_chat.id)
+    if initializing:
+        logger.debug("Sending new photo to Log channel [INITIALIZING]")
+        response_photo = await bot.send_photo(
+                chat_id=settings.LOG_CHANNEL,
+                photo=PHOTO_FILE
+                )
+    else:
+        logger.debug("Updating photo on Log channel")
+        response_photo = await bot.edit_message_media(
+                chat_id=settings.LOG_CHANNEL,
+                message_id=Config.get_last_msg_data()[0],
+                media=InputMediaPhoto(media=open(PHOTO_FILE, 'rb')),
+                )
 
-        if user is None:
-            user = User(
-                    user_id=update.effective_chat.id,
-                    # updated_at=update.message.date
-                    )
-            session.add(user)
-            session.flush()
-            created = True
-        else:
-            user.is_active = True
-            user.last_cmd = update.message.text
-            user.updated_at = update.message.date
+    # Calculate best file_id
+    file_id = max(((x['file_size'], x['file_id']) for x in response_photo.photo))[1]
 
-        try:
-            user_data = UserData(
-                    user_id=user.user_id,
-                    created_at=user.created_at,
-                    updated_at=user.updated_at,
-                    auto_updates=user.auto_updates,
-                    language=user.language,
-                    is_active=user.is_active,
-                    last_error_tg_update=user.last_error_tg_update,
-                    created=created
-                    )
-
-            session.commit()
-        except BaseException as e:
-            print("get_or_update_user ERROR", e.args)
-            session.rollback()
-            return None
-    return user_data
+    # Set last msg id for future message copies
+    # For persistent between reboots
+    Config.set_last_photo(
+            msg_id=str(response_photo.id),
+            file_id=str(file_id),
+            )

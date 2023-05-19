@@ -1,5 +1,6 @@
 """
-Databases
+Models
+
 https://docs.sqlalchemy.org/en/20/orm/declarative_tables.html#using-annotated-declarative-table-type-annotated-forms-for-mapped-column
 """
 import datetime
@@ -55,8 +56,10 @@ class Config(Base):
             default=datetime.datetime(year=2015, month=9, day=29)
             )
 
-    # Last msg file_id
+    # Last msg id
     last_photo_msg_id: Mapped[Optional[str]] = mapped_column(default='', nullable=False)
+    # Last file_id
+    last_file_id: Mapped[Optional[str]] = mapped_column(default='', nullable=False)
 
     @classmethod
     def get_config(cls):
@@ -65,20 +68,21 @@ class Config(Base):
         return config
 
     @classmethod
-    def set_last_photo_msg_id(cls, file_id: str):
-        """Set last msg id for future sends"""
+    def set_last_photo(cls, msg_id: str, file_id: str):
+        """Set last msg id and file_id for future sends"""
         with Session() as session:
             config = session.get(cls, 1)
-            config.last_photo_msg_id = file_id
+            config.last_photo_msg_id = msg_id
+            config.last_file_id = file_id
             session.flush()
             session.commit()
 
     @classmethod
-    def get_last_msg_id(cls):
-        """Get last msg id"""
+    def get_last_msg_data(cls):
+        """Get last msg id and file_id"""
         with Session() as session:
             config = session.get(cls, 1)
-        return config.last_photo_msg_id
+        return (config.last_photo_msg_id, config.last_file_id)
 
 
 class User(Base):
@@ -111,6 +115,7 @@ class User(Base):
     last_cmd: Mapped[Optional[str]] = mapped_column(String(64), default=None)
 
 
+# Check or Create Database
 if not settings.DATABASE_PATH.exists():
     Base.metadata.create_all(engine)
     with Session() as session:

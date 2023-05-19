@@ -34,3 +34,4 @@ venv.bak/
 *.session
 *.session-journal
 
+/docker_database/

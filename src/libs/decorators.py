@@ -1,7 +1,10 @@
+"""
+Decorators
+"""
 from functools import wraps
 
 from libs.settings import AppSettings
-from libs.utils import get_or_update_user
+from libs.tg_users import get_or_update_user
 
 # Settings
 settings = AppSettings()
