@@ -4,6 +4,8 @@ version: "3.7"
 services:
   app:
     container_name: bolitoday
+    image: bolitoday:latest
+
     volumes:
       - ./docker_database/:/app/database/
 
